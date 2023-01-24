@@ -14,7 +14,6 @@ jobs:
       - image: cimg/aws:2022.11
     steps:
       - checkout
-      - install_ansible
       - run:
           name: Create Cloudformation Stack
           command: |
@@ -36,11 +35,13 @@ jobs:
           root: ~/
           paths:
             - inventory
+
   configure_infrastructure:
     docker:
       - image: python:3.7-alpine3.10
     steps:
       - checkout
+      - install_ansible
       - add_ssh_keys:
           # You can get this ID in the section where you registered the SSH Key
           fingerprints: ["ad:9d:92:4b:95:24:77:07:5f:aa:65:db:20:75:8f:6e"]
