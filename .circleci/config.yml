@@ -44,7 +44,7 @@ jobs:
       #     root: ~/
       #     paths:
       #       - inventory
-      - destroy_environment
+      # - destroy_environment
 
   configure_infrastructure:
     docker:
@@ -59,8 +59,22 @@ jobs:
           name: Run Playbook and Configure server
           command: |
             ansible-playbook -i inventory.txt main.yml
+
+  # Exercise: Smoke Testing
+  smoke_test:
+    docker:
+      - image: alpine:latest
+    steps:
+      - run:
+          name: Test job
+          # Fail the job intentionally to simulate an error.
+          when: on_fail
+          command: |
+            return 1
+      - destroy_environment
+
 workflows:
   my-workflow:
     jobs:
-      # - create_infrastructure
-      - configure_infrastructure
+      - create_infrastructure
+      # - configure_infrastructure
