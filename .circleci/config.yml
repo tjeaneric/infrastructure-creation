@@ -15,7 +15,7 @@ commands:
       - run:
           name: install ansible
           command: |
-            python -m pip install ansible
+            apk add --update ansible
 
 jobs:
   create_infrastructure:
@@ -48,7 +48,7 @@ jobs:
 
   configure_infrastructure:
     docker:
-      - image: cimg/python:3.10
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
       - add_ssh_keys:
