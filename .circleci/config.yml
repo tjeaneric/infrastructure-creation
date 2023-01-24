@@ -6,12 +6,18 @@ commands:
       - run:
           name: install ansible
           command: |
-            sudo apt update 
-            #sudo apt install software-properties-common -y 
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            #sudo apt -y update && apt install -y python3
-            sudo apt install -y python3
-            sudo apt install -y ansible
+            apt update --yes
+            apt install software-properties-common --yes
+            add-apt-repository --yes --update ppa:ansible/ansible
+            export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
+            truncate -s0 /tmp/preseed.cfg; \
+            echo "tzdata tzdata/Areas select Europe" >> /tmp/preseed.cfg; \
+            echo "tzdata tzdata/Zones/Europe select Berlin" >> /tmp/preseed.cfg; \
+            debconf-set-selections /tmp/preseed.cfg && \
+            rm -f /etc/timezone /etc/localtime && \
+            apt-get update && \
+            apt-get install -y tzdata
+            apt install ansible --yes
 
 jobs:
   create_infrastructure:
