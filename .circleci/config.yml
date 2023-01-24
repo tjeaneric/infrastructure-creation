@@ -6,18 +6,7 @@ commands:
       - run:
           name: install ansible
           command: |
-            apt update --yes
-            apt install software-properties-common --yes
-            add-apt-repository --yes --update ppa:ansible/ansible
-            export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
-            truncate -s0 /tmp/preseed.cfg; \
-            echo "tzdata tzdata/Areas select Europe" >> /tmp/preseed.cfg; \
-            echo "tzdata tzdata/Zones/Europe select Berlin" >> /tmp/preseed.cfg; \
-            debconf-set-selections /tmp/preseed.cfg && \
-            rm -f /etc/timezone /etc/localtime && \
-            apt-get update && \
-            apt-get install -y tzdata
-            apt install ansible --yes
+            apk add --update ansible
 
 jobs:
   create_infrastructure:
@@ -49,7 +38,7 @@ jobs:
             - inventory
   configure_infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: python:3.7-alpine3.10
     steps:
       - checkout
       - add_ssh_keys:
