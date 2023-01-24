@@ -1,15 +1,46 @@
 version: 2.1
+commands:
+  install_ansible:
+    description: install ansible
+    steps:
+      - run:
+          name: install ansible
+          command: |
+            sudo apt update 
+            #sudo apt install software-properties-common -y 
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            #sudo apt -y update && apt install -y python3
+            sudo apt install -y python3
+            sudo apt install -y ansible
+
 jobs:
   create_infrastructure:
     docker:
       - image: cimg/aws:2022.11
     steps:
       - checkout
+      - install_ansible
       - run:
           name: Create Cloudformation Stack
           command: |
-            aws cloudformation deploy --template-file template.yml --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} --region us-east-1
-
+            aws cloudformation deploy \
+            --template-file template.yml \
+            --tags project=udapeople \
+            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            echo $BACKEND_PUBLIC_IP >> inventory
+            cat inventory
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - inventory
   configure_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
@@ -19,16 +50,13 @@ jobs:
           # You can get this ID in the section where you registered the SSH Key
           fingerprints: ["ad:9d:92:4b:95:24:77:07:5f:aa:65:db:20:75:8f:6e"]
       - run:
-          name: Install Ansible
-          command: |
-            # install the dependencies needed for your playbook
-            apk add --update ansible
-      - run:
           name: Run Playbook and Configure server
           command: |
+            cat inventory
             ansible-playbook -i inventory main.yml < yes
 workflows:
   my-workflow:
     jobs:
-      # - create_infrastructure
-      - configure_infrastructure
+      - create_infrastructure
+      - configure_infrastructure:
+          requires: [create_infrastructure]
