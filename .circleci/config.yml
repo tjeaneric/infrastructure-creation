@@ -62,7 +62,7 @@ jobs:
   # Exercise: Smoke Testing
   smoke_test:
     docker:
-      - image: alpine:latest
+      - image: cimg/aws:2022.11
     steps:
       - run:
           name: Test job
