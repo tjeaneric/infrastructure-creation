@@ -77,4 +77,6 @@ workflows:
   my-workflow:
     jobs:
       - create_infrastructure
+      - smoke-test:
+          requires: [create_infrastructure]
       # - configure_infrastructure
