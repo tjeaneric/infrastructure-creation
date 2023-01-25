@@ -46,6 +46,20 @@ jobs:
       #       - inventory
       # - destroy_environment
 
+  create_cloudfront_distro:
+    docker:
+      - image: cimg/aws:2022.11
+    steps:
+      - checkout
+      - run:
+          name: Create Cloudfront distribution
+          command: |
+            aws cloudformation deploy \
+            --template-file cloudfront.yml \
+            --stack-name production-distro \
+            --parameter-overrides PipelineID="${my-2302105-bucket}" \ # Name of the S3 bucket you created manually.
+            --tags project=udapeople
+
   configure_infrastructure:
     docker:
       - image: cimg/python:3.10
@@ -75,7 +89,8 @@ jobs:
 workflows:
   my-workflow:
     jobs:
-      - create_infrastructure
+      # - create_infrastructure
       # - smoke_test:
       #     requires: [create_infrastructure]
       # - configure_infrastructure
+      - create_cloudfront_distro
