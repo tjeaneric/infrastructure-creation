@@ -9,6 +9,17 @@ commands:
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+
+  destroy_stack:
+    steps:
+      - run:
+          name: Destroy environment
+          # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable
+          # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7}
+
   install_ansible:
     description: install ansible
     steps:
@@ -75,7 +86,8 @@ jobs:
             --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7} \
             --parameter-overrides MyBucketName="mybucket-${CIRCLE_WORKFLOW_ID:0:7}"\
       # Uncomment the step below if yoou wish to upload all contents of the current directory to the S3 bucket
-      - run: aws s3 sync /index.html s3://mybucket-${CIRCLE_WORKFLOW_ID:0:7} --delete
+      - run: aws s3 sync ./index.html s3://mybucket-${CIRCLE_WORKFLOW_ID:0:7} --delete
+      - destroy_stack
 
   # Fetch and save the pipeline ID (bucket ID) responsible for the last release.
   get_last_deployment_id:
